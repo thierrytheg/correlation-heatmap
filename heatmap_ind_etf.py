@@ -18,16 +18,13 @@ currdate=datetime.datetime.fromtimestamp(x).strftime('%m-%d-%Y')
 
 KEY='DEMO'
 
-"""
 ETF=['QQQ','FXE','SPY','IWM','TLT',
      'GLD','EWZ','XLE','FXI','DIA',
      'EEM','AAPL','AMZN','BABA','BBY',
      'BIDU','C','CMG','COST','EBAY',
      'FB','GOOG','GS','IBM','MCD',
      'MSFT','NFLX','NKE','TSLA']
-"""
 
-ETF=['SPY','QQQ']
 
 for a in ETF:
     dailyprice='https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=%s&apikey=%s&outputsize=compact' %(a,KEY)
@@ -52,22 +49,28 @@ for a in ETF:
     time.sleep(15)
 
 df=(pd.DataFrame())
+
 for file in os.listdir(os.getcwd()):
-    nfile=file.split('.')[0]
-    handle=open(file,'r')
+    
+    if file.endswith('.csv'):
+        print(file)
+        nfile=file.split('.')[0]
+        handle=open(file,'r')
 
-    close=[]
+        close=[]
+        for x in handle:
+            content=(((x.split('\n'))[0]).split(','))[2]
+ 
+            try:
+                close.insert(0,float(content))
 
-    for x in handle:
-        print(x)
-        content=(((x.split('\n'))[0]).split(','))[2]
-        try:
-            close.insert(0,float(content))         
-            
-        except Exception:
-            pass
-        
-    df.insert(loc=0,column=nfile,value=close)
+            except Exception:
+                pass
+        df.insert(loc=0,column=nfile,value=close)
+    else:
+        pass
+
+                
 
 corr=df.corr()
 
@@ -80,5 +83,4 @@ sns.heatmap(corr, mask=None, cmap='seismic_r', vmin=-1, vmax=1, center=0,
 
 plt.yticks(rotation=0)
 fig=plt.gcf()
-#a=fig.savefig('heatmap.png')
 plt.show()
